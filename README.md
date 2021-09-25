@@ -1,5 +1,5 @@
-#Docker work environment
-
+# Docker work environment
+```
 docker run -it --rm -v $PWD:/aws -w /aws --entrypoint /bin/bash amazon/aws-cli
 
 yum install -y git
@@ -13,3 +13,4 @@ terraform plan
 terraform apply
 
 aws eks --region eu-west-1 update-kubeconfig --name eks-terraform
+```
