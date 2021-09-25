@@ -8,4 +8,8 @@ curl -L https://releases.hashicorp.com/terraform/1.0.7/terraform_1.0.7_linux_amd
 
 aws configure
 
+terraform init
+terraform plan
+terraform apply
+
 aws eks --region eu-west-1 update-kubeconfig --name eks-terraform
