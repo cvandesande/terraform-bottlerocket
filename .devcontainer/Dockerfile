@@ -2,7 +2,6 @@
 
 # [Choice] Debian version: bullseye, buster, stretch
 ARG VARIANT="bullseye"
-ARG TERRAFORM_VERSION="1.0.7"
 FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
 # ** [Optional] Uncomment this section to install additional packages. **
