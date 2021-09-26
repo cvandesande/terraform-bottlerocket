@@ -94,7 +94,7 @@ module "eks" {
       ami_id               = data.aws_ami.bottlerocket_ami.id
       instance_type        = var.instance_type
       asg_desired_capacity = 1
-      #key_name             = aws_key_pair.nodes.key_name
+      #key_name             = aws_key_pair.nodes.key_name # SSH not enable on bottlerocket
       public_ip            = false
 
       # This section overrides default userdata template to pass bottlerocket
