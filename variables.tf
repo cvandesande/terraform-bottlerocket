@@ -18,17 +18,19 @@ variable "instance_type" {
 }
 
 variable "asg_desired_capacity" {
+  description = "Auto scaling desired capacity"
   default = "1"
 }
 
 variable "asg_min_capacity" {
+  description = "Auto scaling minimum capacity"
   default = "1"
 }
 
 variable "asg_max_capacity" {
+  description = "Auto scaling maximum capacity"
   default = "6"
 }
-
 
 variable "k8s_service_account_namespace" {
   description = "Autoscaler service account namespace"
