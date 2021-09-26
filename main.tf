@@ -100,7 +100,7 @@ module "eks" {
       asg_desired_capacity = var.asg_desired_capacity
       min_size             = var.asg_min_capacity
       max_size             = var.asg_max_capacity
-      #key_name             = aws_key_pair.nodes.key_name # SSH not enable on bottlerocket
+      #key_name             = aws_key_pair.nodes.key_name # SSH not enabled on bottlerocket
       public_ip            = false
 
       tags = [
@@ -159,7 +159,6 @@ resource "aws_security_group" "all_worker_mgmt" {
     ]
   }
 }
-
 
 resource "kubernetes_deployment" "nginx" {
   metadata {

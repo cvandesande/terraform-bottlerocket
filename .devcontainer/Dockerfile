@@ -26,4 +26,3 @@ RUN set -x; curl -Lo /usr/local/bin/kubectl ${KUBECTL_URL} \
   && ./aws/install \
   && rm -rf awscliv2.zip /aws \
   && curl ${HELM_URL} | bash
-  
