@@ -19,7 +19,8 @@ RUN  curl -Lo /usr/local/bin/kubectl \
      && chmod +x /usr/local/bin/kubectl \
      && curl -L \
      https://releases.hashicorp.com/terraform/${TF_VERSION}/${TF_ZIP} \
-     | zcat >> /usr/local/bin/terraform && chmod +x /usr/local/bin/terraform \
+     | zcat >> /usr/local/bin/terraform \
+     && chmod +x /usr/local/bin/terraform \
      && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
      -o "awscliv2.zip" \
      && unzip awscliv2.zip \
