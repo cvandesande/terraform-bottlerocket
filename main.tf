@@ -26,6 +26,8 @@ data "aws_eks_cluster_auth" "cluster" {
 
 data "aws_availability_zones" "available" {}
 
+data "aws_caller_identity" "current" {}
+
 data "aws_ami" "bottlerocket_ami" {
   most_recent = true
   owners      = ["amazon"]
@@ -86,6 +88,7 @@ module "eks" {
   subnets                         = module.vpc.private_subnets
   cluster_create_timeout          = "1h"
   cluster_endpoint_private_access = true
+  enable_irsa                     = true
   write_kubeconfig                = false
   
   worker_groups_launch_template = [
@@ -96,6 +99,19 @@ module "eks" {
       asg_desired_capacity = 1
       #key_name             = aws_key_pair.nodes.key_name # SSH not enable on bottlerocket
       public_ip            = false
+
+      tags = [
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/enabled"
+          "propagate_at_launch" = "false"
+          "value"               = "true"
+        },
+        {
+          "key"                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"
+          "propagate_at_launch" = "false"
+          "value"               = "owned"
+        }
+      ]
 
       # This section overrides default userdata template to pass bottlerocket
       # specific user data
@@ -116,6 +132,12 @@ EOT
   ]
 
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
+}
+
+# Install kube metrics-server for autoscaling
+module "metrics_server" {
+  source = "cookielab/metrics-server/kubernetes"
+  version = "0.11.1"
 }
 
 provider "kubernetes" {

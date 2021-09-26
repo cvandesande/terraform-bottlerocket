@@ -17,7 +17,15 @@ variable "instance_type" {
   default = "t3a.small"
 }
 
+variable "k8s_service_account_namespace" {
+  description = "Autoscaler service account namespace"
+  default = "kube-system"
+}
 
+variable "k8s_service_account_name" {
+  description = "Autoscaler service account name"
+  default = "cluster-autoscaler-aws-cluster-autoscaler-chart"
+}
 ## Additional users
 
 #variable "map_accounts" {
