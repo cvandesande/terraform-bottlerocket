@@ -8,12 +8,30 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.0.0"
     }
+    helm ={
+      source = "hashicorp/helm"
+      version = "~> 2.3.0"
+    }
   }
   required_version = "~> 1.0.0"
 }
 
 provider "aws" {
   region = var.region
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+    token                  = data.aws_eks_cluster_auth.cluster.token
+  }
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -35,23 +53,6 @@ data "aws_ami" "bottlerocket_ami" {
   filter {
     name   = "name"
     values = ["bottlerocket-aws-k8s-${module.eks.cluster_version}-x86_64-*"]
-  }
-}
-
-resource "aws_security_group" "all_worker_mgmt" {
-  name_prefix = "all_worker_management"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-
-    cidr_blocks = [
-      "10.0.0.0/8",
-      "172.16.0.0/12",
-      "192.168.0.0/16",
-    ]
   }
 }
 
@@ -96,7 +97,9 @@ module "eks" {
       name                 = "bottlerocket-nodes"
       ami_id               = data.aws_ami.bottlerocket_ami.id
       instance_type        = var.instance_type
-      asg_desired_capacity = 1
+      asg_desired_capacity = var.asg_desired_capacity
+      min_size             = var.asg_min_capacity
+      max_size             = var.asg_max_capacity
       #key_name             = aws_key_pair.nodes.key_name # SSH not enable on bottlerocket
       public_ip            = false
 
@@ -140,11 +143,23 @@ module "metrics_server" {
   version = "0.11.1"
 }
 
-provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+resource "aws_security_group" "all_worker_mgmt" {
+  name_prefix = "all_worker_management"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
+
+    cidr_blocks = [
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16",
+    ]
+  }
 }
+
 
 resource "kubernetes_deployment" "nginx" {
   metadata {
@@ -205,5 +220,39 @@ resource "kubernetes_service" "nginx" {
     }
 
     type = "LoadBalancer"
+  }
+}
+
+resource helm_release autoscaler {
+  name       = "cluster-autoscaler"
+
+  repository = "https://kubernetes.github.io/autoscaler"
+  chart      = "cluster-autoscaler"
+
+  namespace = "kube-system"
+
+  set {
+    name  = "awsRegion"
+    value = var.region
+  }
+  set {
+    name  = "rbac.create"
+    value = true
+  }
+  set {
+    name  = "rbac.serviceAccount.name"
+    value = "cluster-autoscaler-aws-cluster-autoscaler-chart"
+  }
+  set {
+    name  = "rbac.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cluster-autoscaler"
+  }
+  set {
+    name  = "autoDiscovery.clusterName"
+    value = var.cluster_name
+  }
+  set {
+    name  = "autoDiscovery.enabled"
+    value = true
   }
 }

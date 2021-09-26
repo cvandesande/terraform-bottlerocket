@@ -17,6 +17,19 @@ variable "instance_type" {
   default = "t3a.small"
 }
 
+variable "asg_desired_capacity" {
+  default = "1"
+}
+
+variable "asg_min_capacity" {
+  default = "1"
+}
+
+variable "asg_max_capacity" {
+  default = "6"
+}
+
+
 variable "k8s_service_account_namespace" {
   description = "Autoscaler service account namespace"
   default = "kube-system"
