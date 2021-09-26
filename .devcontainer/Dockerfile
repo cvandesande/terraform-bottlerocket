@@ -11,12 +11,18 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
 # Install latest kubectl
 RUN curl -Lo /usr/local/bin/kubectl \
-     "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+     "https://dl.k8s.io/release/$(curl -L -s \
+     https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
      chmod +x /usr/local/bin/kubectl
+
 # Install Terraform
-RUN set -x; curl -L https://releases.hashicorp.com/terraform/1.0.7/terraform_1.0.7_linux_amd64.zip \
+RUN set -x; curl -L \
+     https://releases.hashicorp.com/terraform/1.0.7/terraform_1.0.7_linux_amd64.zip \
      | zcat >> /usr/local/bin/terraform && chmod +x /usr/local/bin/terraform
 
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-     unzip awscliv2.zip && \
-     ./aws/install
+# Install awscliv2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+     -o "awscliv2.zip" && \
+      unzip awscliv2.zip && \
+     ./aws/install && \
+     rm awscliv2.zip
