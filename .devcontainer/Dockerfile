@@ -12,7 +12,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 ARG TF_VERSION=${TF_VERSION}
 ARG TF_ZIP=terraform_${TF_VERSION}_linux_amd64.zip
 
-# Install kubectl, Terraform, awscli
+# Install awscli, terraform, kubectl, helm
 RUN  curl -Lo /usr/local/bin/kubectl \
      "https://dl.k8s.io/release/$(curl -L -s \
      https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
@@ -25,4 +25,6 @@ RUN  curl -Lo /usr/local/bin/kubectl \
      -o "awscliv2.zip" \
      && unzip awscliv2.zip \
      && ./aws/install \
-     && rm awscliv2.zip
+     && rm -rf awscliv2.zip /aws \
+     && curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+     | bash
