@@ -98,8 +98,8 @@ module "eks" {
       ami_id               = data.aws_ami.bottlerocket_ami.id
       instance_type        = var.instance_type
       asg_desired_capacity = var.asg_desired_capacity
-      min_size             = var.asg_min_capacity
-      max_size             = var.asg_max_capacity
+      asg_min_size         = var.asg_min_capacity
+      asg_max_size         = var.asg_max_capacity
       #key_name             = aws_key_pair.nodes.key_name # SSH not enabled on bottlerocket
       public_ip            = false
 
@@ -143,19 +143,20 @@ module "metrics_server" {
   version = "0.11.1"
 }
 
-resource "aws_security_group" "all_worker_mgmt" {
-  name_prefix = "all_worker_management"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-
-    cidr_blocks = [
-      "10.0.0.0/8",
-      "172.16.0.0/12",
-      "192.168.0.0/16",
-    ]
-  }
-}
+# No shell/SSH on bottlerocket nodes
+#resource "aws_security_group" "all_worker_mgmt" {
+#  name_prefix = "all_worker_management"
+#  vpc_id      = module.vpc.vpc_id
+#
+#  ingress {
+#    from_port = 22
+#    to_port   = 22
+#    protocol  = "tcp"
+#
+#    cidr_blocks = [
+#      "10.0.0.0/8",
+#      "172.16.0.0/12",
+#      "192.168.0.0/16",
+#    ]
+#  }
+#}
