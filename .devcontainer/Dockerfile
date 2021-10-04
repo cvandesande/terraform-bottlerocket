@@ -9,20 +9,23 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 #    apt-get -y install --no-install-recommends <your-package-list-here>
 
 # Install ARGs
-ARG AWS_URL=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
 ARG KUBECTL_VERSION=${KUBECTL_VERSION}
-ARG KUBECTL_URL=https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 ARG TF_VERSION=${TF_VERSION}
-ARG TF_URL=https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
-ARG HELM_URL=https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 
 # Install awscli, terraform, kubectl, helm
-RUN set -x; curl -Lo /usr/local/bin/kubectl ${KUBECTL_URL} \
+RUN set -x; MACH=$(uname -m) \
+  && ARCH=$(dpkg --print-architecture) \
+  && curl -Lo /usr/local/bin/kubectl \
+  https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${ARCH}/kubectl \
   && chmod +x /usr/local/bin/kubectl \
-  && curl -L ${TF_URL} | zcat >> /usr/local/bin/terraform \
+  && curl -L \
+  https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_${ARCH}.zip \
+  | zcat >> /usr/local/bin/terraform \
   && chmod +x /usr/local/bin/terraform \
-  && curl ${AWS_URL} -o "awscliv2.zip" \
+  && curl -Lo "awscliv2.zip" \
+  https://awscli.amazonaws.com/awscli-exe-linux-${MACH}.zip \
   && unzip awscliv2.zip \
   && ./aws/install \
   && rm -rf awscliv2.zip /aws \
-  && curl ${HELM_URL} | bash
+  && curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+  | bash
