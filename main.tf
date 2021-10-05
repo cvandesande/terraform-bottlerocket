@@ -133,8 +133,8 @@ ingress = "allowed"
 EOT
     }
   ]
-
-  worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
+  # Enable to use security groups
+  #worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
 }
 
 # Install kube metrics-server for autoscaling
